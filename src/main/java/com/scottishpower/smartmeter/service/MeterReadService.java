@@ -85,7 +85,10 @@ public class MeterReadService {
     }
 
     private void calculateAdditionalFields(List<MeterRead> reads) {
-        reads.sort(Comparator.comparing(MeterRead::getReadDate));
+        reads.sort(Comparator.comparing(MeterRead::getReadDate)); // Ensure reads are sorted by date
+
+        double totalUsage = 0;
+        long totalDays = 0;
 
         for (int i = 1; i < reads.size(); i++) {
             MeterRead currentRead = reads.get(i);
@@ -96,7 +99,13 @@ public class MeterReadService {
 
             currentRead.setUsageSinceLastRead(usageSinceLastRead);
             currentRead.setPeriodSinceLastRead(daysSinceLastRead);
+
+            totalUsage += usageSinceLastRead;
+            totalDays += daysSinceLastRead;
         }
+
+        double avgDailyUsage = totalDays > 0 ? totalUsage / totalDays : 0;
+        reads.forEach(read -> read.setAvgDailyUsage(avgDailyUsage));
     }
 
 }

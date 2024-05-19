@@ -57,7 +57,18 @@ Authorization: Basic <base64encoded_credentials>
             "readDate": "2023-04-10",
             "usageSinceLastRead": null,
             "periodSinceLastRead": null,
-            "avgDailyUsage": null,
+            "avgDailyUsage": 3.3333333333333335,
+            "gasComparison": null,
+            "elecComparison": null
+        },
+        {
+            "id": 4,
+            "meterId": 101,
+            "reading": 250.0,
+            "readDate": "2023-05-10",
+            "usageSinceLastRead": 100.0,
+            "periodSinceLastRead": 30,
+            "avgDailyUsage": 3.3333333333333335,
             "gasComparison": null,
             "elecComparison": null
         }
@@ -70,7 +81,18 @@ Authorization: Basic <base64encoded_credentials>
             "readDate": "2023-04-10",
             "usageSinceLastRead": null,
             "periodSinceLastRead": null,
-            "avgDailyUsage": null,
+            "avgDailyUsage": 3.6666666666666665,
+            "gasComparison": null,
+            "elecComparison": null
+        },
+        {
+            "id": 5,
+            "meterId": 102,
+            "reading": 360.0,
+            "readDate": "2023-05-10",
+            "usageSinceLastRead": 110.0,
+            "periodSinceLastRead": 30,
+            "avgDailyUsage": 3.6666666666666665,
             "gasComparison": null,
             "elecComparison": null
         }

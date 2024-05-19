@@ -39,4 +39,7 @@ public class MeterRead {
     @Transient
     private Long periodSinceLastRead;
 
+    @Transient
+    private Double avgDailyUsage;
+
 }

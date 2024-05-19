@@ -58,8 +58,12 @@ public class MeterReadControllerIntegrationTest {
         String accountNumber = generateUniqueAccountNumber();
         Account account = createAccount(accountNumber);
 
-        createMeterRead(account, "GAS", 100.0, LocalDate.now().minusDays(1));
-        createMeterRead(account, "ELEC", 200.0, LocalDate.now().minusDays(1));
+        createMeterRead(account, "GAS", 100.0, LocalDate.now().minusDays(3));
+        createMeterRead(account, "GAS", 150.0, LocalDate.now().minusDays(2));
+        createMeterRead(account, "GAS", 200.0, LocalDate.now().minusDays(1));
+        createMeterRead(account, "ELEC", 200.0, LocalDate.now().minusDays(3));
+        createMeterRead(account, "ELEC", 300.0, LocalDate.now().minusDays(2));
+        createMeterRead(account, "ELEC", 400.0, LocalDate.now().minusDays(1));
 
         ResponseEntity<MeterReadResponse> response = restTemplate.withBasicAuth("user", "password")
             .getForEntity(baseUrl + "/reads/" + accountNumber, MeterReadResponse.class);
@@ -68,8 +72,46 @@ public class MeterReadControllerIntegrationTest {
         MeterReadResponse responseBody = response.getBody();
         assertNotNull(responseBody);
         assertEquals(accountNumber, responseBody.getAccountNumber());
-        assertEquals(1, responseBody.getGasReadings().size());
-        assertEquals(1, responseBody.getElecReadings().size());
+        assertEquals(3, responseBody.getGasReadings().size());
+        assertEquals(3, responseBody.getElecReadings().size());
+
+        // Verify usageSinceLastRead and daysSinceLastRead for GAS
+        MeterReadResponse.MeterReadDTO gasRead1 = responseBody.getGasReadings().get(0);
+        MeterReadResponse.MeterReadDTO gasRead2 = responseBody.getGasReadings().get(1);
+        MeterReadResponse.MeterReadDTO gasRead3 = responseBody.getGasReadings().get(2);
+
+        assertNull(gasRead1.getUsageSinceLastRead());
+        assertNull(gasRead1.getPeriodSinceLastRead());
+
+        assertEquals(50.0, gasRead2.getUsageSinceLastRead());
+        assertEquals(1L, gasRead2.getPeriodSinceLastRead());
+        assertEquals(50.0, gasRead3.getUsageSinceLastRead());
+        assertEquals(1L, gasRead3.getPeriodSinceLastRead());
+
+        // Verify usageSinceLastRead and daysSinceLastRead for ELEC
+        MeterReadResponse.MeterReadDTO elecRead1 = responseBody.getElecReadings().get(0);
+        MeterReadResponse.MeterReadDTO elecRead2 = responseBody.getElecReadings().get(1);
+        MeterReadResponse.MeterReadDTO elecRead3 = responseBody.getElecReadings().get(2);
+
+        assertNull(elecRead1.getUsageSinceLastRead());
+        assertNull(elecRead1.getPeriodSinceLastRead());
+
+        assertEquals(100.0, elecRead2.getUsageSinceLastRead());
+        assertEquals(1L, elecRead2.getPeriodSinceLastRead());
+        assertEquals(100.0, elecRead3.getUsageSinceLastRead());
+        assertEquals(1L, elecRead3.getPeriodSinceLastRead());
+
+        // Verify avgDailyUsage for GAS
+        double expectedGasAvgDailyUsage = 50.0; // Total usage 100.0 over 2 days
+        assertEquals(expectedGasAvgDailyUsage, responseBody.getGasReadings().get(0).getAvgDailyUsage());
+        assertEquals(expectedGasAvgDailyUsage, responseBody.getGasReadings().get(1).getAvgDailyUsage());
+        assertEquals(expectedGasAvgDailyUsage, responseBody.getGasReadings().get(2).getAvgDailyUsage());
+
+        // Verify avgDailyUsage for ELEC
+        double expectedElecAvgDailyUsage = 100.0; // Total usage 200.0 over 2 days
+        assertEquals(expectedElecAvgDailyUsage, responseBody.getElecReadings().get(0).getAvgDailyUsage());
+        assertEquals(expectedElecAvgDailyUsage, responseBody.getElecReadings().get(1).getAvgDailyUsage());
+        assertEquals(expectedElecAvgDailyUsage, responseBody.getElecReadings().get(2).getAvgDailyUsage());
     }
 
     @Test
@@ -179,39 +221,6 @@ public class MeterReadControllerIntegrationTest {
         assertEquals(
             Exceptions.INVALID_METER_READING_LOWER.getApiError().getCode(), response.getBody().getCode());
         Assertions.assertEquals(Exceptions.INVALID_METER_READING_LOWER.getApiError().getMessage(), response.getBody().getMessage());
-    }
-
-    @Test
-    public void testGetMeterReadsByAccountNumberWithUsages() {
-        String accountNumber = generateUniqueAccountNumber();
-        Account account = createAccount(accountNumber);
-
-        createMeterRead(account, "GAS", 100.0, LocalDate.now().minusDays(2));
-        createMeterRead(account, "GAS", 150.0, LocalDate.now().minusDays(1));
-        createMeterRead(account, "ELEC", 200.0, LocalDate.now().minusDays(2));
-        createMeterRead(account, "ELEC", 300.0, LocalDate.now().minusDays(1));
-
-        ResponseEntity<MeterReadResponse> response = restTemplate.withBasicAuth("user", "password")
-            .getForEntity(baseUrl + "/reads/" + accountNumber, MeterReadResponse.class);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        MeterReadResponse responseBody = response.getBody();
-        assertNotNull(responseBody);
-        assertEquals(accountNumber, responseBody.getAccountNumber());
-        assertEquals(2, responseBody.getGasReadings().size());
-        assertEquals(2, responseBody.getElecReadings().size());
-
-        // Verify usageSinceLastRead and daysSinceLastRead for GAS
-        MeterReadResponse.MeterReadDTO gasRead1 = responseBody.getGasReadings().get(0);
-        MeterReadResponse.MeterReadDTO gasRead2 = responseBody.getGasReadings().get(1);
-        assertEquals(50.0, gasRead2.getUsageSinceLastRead());
-        assertEquals(1L, gasRead2.getPeriodSinceLastRead());
-
-        // Verify usageSinceLastRead and daysSinceLastRead for ELEC
-        MeterReadResponse.MeterReadDTO elecRead1 = responseBody.getElecReadings().get(0);
-        MeterReadResponse.MeterReadDTO elecRead2 = responseBody.getElecReadings().get(1);
-        assertEquals(100.0, elecRead2.getUsageSinceLastRead());
-        assertEquals(1L, elecRead2.getPeriodSinceLastRead());
     }
 
     private Account createAccount(String accountNumber) {
