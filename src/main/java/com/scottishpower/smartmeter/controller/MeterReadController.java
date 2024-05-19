@@ -28,7 +28,8 @@ public class MeterReadController {
     public ResponseEntity<?> getMeterReadsByAccountNumber(@PathVariable String accountNumber) {
         List<MeterRead> gasReads = meterReadService.getMeterReadsByAccountNumberAndType(accountNumber, "GAS");
         List<MeterRead> elecReads = meterReadService.getMeterReadsByAccountNumberAndType(accountNumber, "ELEC");
-        return ResponseEntity.ok(new MeterReadResponse(accountNumber, gasReads, elecReads));
+        MeterReadResponse response = new MeterReadResponse(accountNumber, gasReads, elecReads);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/reads")

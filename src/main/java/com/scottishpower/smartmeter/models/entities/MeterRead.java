@@ -32,4 +32,11 @@ public class MeterRead {
 
     @Column(name = "type", nullable = false)
     private String type;
+
+    @Transient
+    private Double usageSinceLastRead;
+
+    @Transient
+    private Long periodSinceLastRead;
+
 }

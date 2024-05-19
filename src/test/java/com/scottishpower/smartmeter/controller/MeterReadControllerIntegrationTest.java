@@ -181,6 +181,39 @@ public class MeterReadControllerIntegrationTest {
         Assertions.assertEquals(Exceptions.INVALID_METER_READING_LOWER.getApiError().getMessage(), response.getBody().getMessage());
     }
 
+    @Test
+    public void testGetMeterReadsByAccountNumberWithUsages() {
+        String accountNumber = generateUniqueAccountNumber();
+        Account account = createAccount(accountNumber);
+
+        createMeterRead(account, "GAS", 100.0, LocalDate.now().minusDays(2));
+        createMeterRead(account, "GAS", 150.0, LocalDate.now().minusDays(1));
+        createMeterRead(account, "ELEC", 200.0, LocalDate.now().minusDays(2));
+        createMeterRead(account, "ELEC", 300.0, LocalDate.now().minusDays(1));
+
+        ResponseEntity<MeterReadResponse> response = restTemplate.withBasicAuth("user", "password")
+            .getForEntity(baseUrl + "/reads/" + accountNumber, MeterReadResponse.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        MeterReadResponse responseBody = response.getBody();
+        assertNotNull(responseBody);
+        assertEquals(accountNumber, responseBody.getAccountNumber());
+        assertEquals(2, responseBody.getGasReadings().size());
+        assertEquals(2, responseBody.getElecReadings().size());
+
+        // Verify usageSinceLastRead and daysSinceLastRead for GAS
+        MeterReadResponse.MeterReadDTO gasRead1 = responseBody.getGasReadings().get(0);
+        MeterReadResponse.MeterReadDTO gasRead2 = responseBody.getGasReadings().get(1);
+        assertEquals(50.0, gasRead2.getUsageSinceLastRead());
+        assertEquals(1L, gasRead2.getPeriodSinceLastRead());
+
+        // Verify usageSinceLastRead and daysSinceLastRead for ELEC
+        MeterReadResponse.MeterReadDTO elecRead1 = responseBody.getElecReadings().get(0);
+        MeterReadResponse.MeterReadDTO elecRead2 = responseBody.getElecReadings().get(1);
+        assertEquals(100.0, elecRead2.getUsageSinceLastRead());
+        assertEquals(1L, elecRead2.getPeriodSinceLastRead());
+    }
+
     private Account createAccount(String accountNumber) {
         Account account = new Account();
         account.setAccountNumber(accountNumber);

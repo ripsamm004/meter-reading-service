@@ -45,8 +45,8 @@ public class MeterReadResponse {
             this.reading = meterRead.getReading();
             this.readDate = meterRead.getReadDate();
             // The following fields would need calculation logic
-            this.usageSinceLastRead = null;
-            this.periodSinceLastRead = null;
+            this.usageSinceLastRead = meterRead.getUsageSinceLastRead();
+            this.periodSinceLastRead = meterRead.getPeriodSinceLastRead();
             this.avgDailyUsage = null;
             this.gasComparison = null;
             this.elecComparison = null;

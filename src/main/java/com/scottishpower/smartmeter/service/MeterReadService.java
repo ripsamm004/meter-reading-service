@@ -8,6 +8,7 @@ import com.scottishpower.smartmeter.models.dto.MeterReadRequest;
 import com.scottishpower.smartmeter.models.entities.Account;
 import com.scottishpower.smartmeter.models.entities.MeterRead;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.Comparator;
@@ -78,6 +79,24 @@ public class MeterReadService {
     public List<MeterRead> getMeterReadsByAccountNumberAndType(String accountNumber, String type) {
         Account account = accountService.getAccountByNumber(accountNumber)
             .orElseThrow(() -> Exceptions.API_ERROR_ACCOUNT_NOT_FOUND);
-        return meterReadRepository.findByAccountAccountNumberAndType(accountNumber, type);
+        List<MeterRead> reads = meterReadRepository.findByAccountAccountNumberAndType(accountNumber, type);
+        calculateAdditionalFields(reads);
+        return reads;
     }
+
+    private void calculateAdditionalFields(List<MeterRead> reads) {
+        reads.sort(Comparator.comparing(MeterRead::getReadDate));
+
+        for (int i = 1; i < reads.size(); i++) {
+            MeterRead currentRead = reads.get(i);
+            MeterRead previousRead = reads.get(i - 1);
+
+            double usageSinceLastRead = currentRead.getReading() - previousRead.getReading();
+            long daysSinceLastRead = ChronoUnit.DAYS.between(previousRead.getReadDate(), currentRead.getReadDate());
+
+            currentRead.setUsageSinceLastRead(usageSinceLastRead);
+            currentRead.setPeriodSinceLastRead(daysSinceLastRead);
+        }
+    }
+
 }
