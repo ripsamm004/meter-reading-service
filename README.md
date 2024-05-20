@@ -223,8 +223,11 @@ Response
 ### Metric Endpoint
 
 **URL:** {host_URL}/actuator/metrics 
+
 **Request-Method:** GET
+
 **URL Example:** http://localhost:8081/actuator/metrics  
+
 **Headers:**
 ```
 Content-Type: application/json
