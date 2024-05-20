@@ -210,9 +210,15 @@ Authorization: Basic <base64encoded_credentials>
 
 ---
 
-# Health Checks and Metrics Endpoints
+### Health Checks Endpoint
+
+**URL:** {host_URL}/actuator/health 
+
+**Request-Method:** GET
+
+**URL Example:** http://localhost:8081/actuator/health
+
 ```
-# Liveness Endpoint : GET /actuator/health
 Response
 // HTTP/1.1 200 OK
 {
