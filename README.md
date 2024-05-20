@@ -220,11 +220,13 @@ Response
 }
 
 # Metric Endpoint : GET /actuator/metrics
+
 **Headers:**
 ```
 Content-Type: application/json
 Authorization: Basic <base64encoded_credentials>
 ```
+
 Response
 // HTTP/1.1 200 OK
 {
